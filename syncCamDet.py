@@ -4,18 +4,12 @@ import threading
 
 class csiCamera:
     def __init__(self):
-        ## Camera Initialization
         self.camNum = None
         self.net = None
         self.camera = None
         self.display = None
         self.img = None
         self.detection = None
-        
-        ## Thread Initialization
-        self.thread = None
-        self.threadLock = threading.Lock()
-        self.threadRunning = False
 
     def openCam(self, camNum):
         try:
@@ -25,38 +19,25 @@ class csiCamera:
             self.display = jetson.utils.videoOutput("display://" + self.camNum)
         
         except RuntimeError:
+            print("Cannot open Cam" + camNum)
             self.camNum = None
             self.net = None
             self.camera = None
             self.display = None
-            print("Cannot open Cam" + camNum)
 
     def runThread(self):
-        if self.threadRunning:
-            print("Already running detectObjects thread on Cam" + self.camNum)
-            return None
-        
         if self.camera != None and self.display != None:
-            self.threadRunning = True
             self.thread = threading.Thread(target = self.detectObjects)
             self.thread.start()
-        return self
 
     def detectObjects(self):
-        while self.threadRunning and self.display.IsStreaming():
-            try:
-                with self.threadLock:
-                    self.img = self.camera.Capture()
-                    self.detection = self.net.Detect(self.img)
-                    self.display.Render(self.img)
-    
-                    self.display.SetStatus("Cam" + self.camNum + " | Object Detection | Network {:.0f} FPS".format(self.net.GetNetworkFPS()))
-
-            except RuntimeError:
-                print('Could not read image from camera')
+        while self.display.IsStreaming():
+            self.img = self.camera.Capture()
+            self.detection = self.net.Detect(self.img)
+            self.display.Render(self.img)
+            self.display.SetStatus("Cam" + self.camNum + " | Object Detection | Network {:.0f} FPS".format(self.net.GetNetworkFPS()))
 
     def stopThread(self):
-        self.threadRunning = False
         self.thread.join()
         self.thread = None
     
@@ -80,24 +61,22 @@ class csiCamera:
             self.thread = None
 
 def syncCamDet():
-    left_cam = csiCamera()
-    left_cam.openCam("1")
+    rightCam = csiCamera()
+    rightCam.openCam("0")
+    
+    leftCam = csiCamera()
+    leftCam.openCam("1")
+    
+    rightCam.runThread()
+    leftCam.runThread()
 
-    right_cam = csiCamera()
-    right_cam.openCam("0")
+    if rightCam.display != None and leftCam.display != None:
+        while rightCam.display.IsStreaming() and leftCam.display.IsStreaming():
+    
+    rightCam.stopThread()
+    rightCam.freeSpace()
+    
+    leftCam.stopThread() 
+    leftCam.freeSpace()
 
-    left_cam.runThread()
-    right_cam.runThread()
-
-    while True:
-        if not left_cam.display.IsStreaming() and left_cam.threadRunning:
-            left_cam.stopThread()
-
-        if not right_cam.display.IsStreaming() and right_cam.threadRunning:
-            right_cam.stopThread()
-
-        if not left_cam.threadRunning and not right_cam.threadRunning:
-            break
-
-    left_cam.freeSpace()
-    right_cam.freeSpace()
+syncCamDet()
