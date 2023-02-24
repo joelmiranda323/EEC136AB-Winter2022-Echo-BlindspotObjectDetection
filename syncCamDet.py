@@ -41,7 +41,7 @@ class csiCamera:
         self.thread.join()
         self.thread = None
     
-    def freeSpace(self):
+    def destroy(self):
         self.camNum = None
         self.net = None
 
@@ -70,13 +70,13 @@ def syncCamDet():
     rightCam.runThread()
     leftCam.runThread()
 
-    if rightCam.display != None and leftCam.display != None:
-        while rightCam.display.IsStreaming() and leftCam.display.IsStreaming():
+    if rightCam.display != None or leftCam.display != None:
+        while rightCam.display.IsStreaming() or leftCam.display.IsStreaming():
     
     rightCam.stopThread()
-    rightCam.freeSpace()
+    rightCam.destroy()
     
-    leftCam.stopThread() 
-    leftCam.freeSpace()
+    leftCam.stopThread()  
+    leftCam.destroy()
 
 syncCamDet()
