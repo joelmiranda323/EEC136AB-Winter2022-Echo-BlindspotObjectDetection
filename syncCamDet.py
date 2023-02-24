@@ -13,13 +13,14 @@ class csiCamera:
 
     def openCam(self, camNum):
         try:
-            self.camNum = camNum
+            print("\nOpening Cam" + camNum + "\n)
+            self.camNum = camNun
             self.net = jetson.inference.detectNet("ssd-mobilenet-v2", threshold=0.5)
             self.camera = jetson.utils.videoSource("csi://" + self.camNum)
             self.display = jetson.utils.videoOutput("display://" + self.camNum)
         
         except RuntimeError:
-            print("Cannot open Cam" + camNum)
+            print("\nCannot open Cam" + camNum + "\n")
             self.camNum = None
             self.net = None
             self.camera = None
@@ -36,10 +37,6 @@ class csiCamera:
             self.detection = self.net.Detect(self.img)
             self.display.Render(self.img)
             self.display.SetStatus("Cam" + self.camNum + " | Object Detection | Network {:.0f} FPS".format(self.net.GetNetworkFPS()))
-
-    def stopThread(self):
-        self.thread.join()
-        self.thread = None
     
     def destroy(self):
         self.camNum = None
@@ -47,11 +44,11 @@ class csiCamera:
 
         if self.camera.IsStreaming():
             self.camera.Close()
-            self.camera = None
+        self.camera = None
 
         if self.display.IsStreaming():
             self.display.Close()
-            self.display = None
+        self.display = None
             
         self.img = None
         self.detection = None
@@ -69,14 +66,22 @@ def syncCamDet():
     
     rightCam.runThread()
     leftCam.runThread()
-
-    if rightCam.display != None or leftCam.display != None:
-        while rightCam.display.IsStreaming() or leftCam.display.IsStreaming():
     
-    rightCam.stopThread()
+    print("waiting for threads to finish")
+    rightCam.thread.join()
+    leftCam.thread.join()
+    
+    print("destroying csi camera objects")
     rightCam.destroy()
-    
-    leftCam.stopThread()  
     leftCam.destroy()
+
+    #if rightCam.display != None or leftCam.display != None:
+    #    while rightCam.display.IsStreaming() or leftCam.display.IsStreaming():
+    
+    #rightCam.stopThread()
+    #rightCam.destroy()
+    
+    #leftCam.stopThread()  
+    #leftCam.destroy()
 
 syncCamDet()
