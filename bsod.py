@@ -7,12 +7,11 @@ import time
 # Pin Definitions
 leftTurn = 13      # Board pin 33 as left turn LED
 leftSW = 7         # Board pin 26 as left switch
-leftWarning = 10   # Board pin 19 as left warining LED
 
 rightTurn =  4       # Board pin 07 as right turn LED
 rightSW = 8          # Board pin 24 as right switch
-rightWarning = 22    # Board pin 15 as right warning LED
 
+warningLED = 22         # Board pin 15 as right warning LED
 
 class csiCamera:
     def __init__(self):
@@ -46,10 +45,14 @@ class csiCamera:
             self.thread.start()
 
     def detectObjects(self):
+        objectsInBlindSpot = False
         self.img = self.camera.Capture()
-        self.detection = self.net.Detect(self.img)
+        self.detections = self.net.Detect(self.img)
+        if len(self.detections) != 0:
+            objectsInBlindSpot = True
         self.display.Render(self.img)
         self.display.SetStatus("Cam" + self.camNum + " | Object Detection | Network {:.0f} FPS".format(self.net.GetNetworkFPS()))
+        return objectsInBlindSpot
     
     def destroy(self):
         print("\n\nDestroying Cam"+ self.camNum + "\n\n")
@@ -70,7 +73,7 @@ class csiCamera:
 def main():
     # Pin Setup:
     GPIO.setmode(GPIO.BCM)  # BCM pin-numbering scheme from Raspberry Pi
-    GPIO.setup([leftTurn, rightTurn], GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup([leftTurn, rightTurn, warningLED], GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup([leftSW, rightSW], GPIO.IN)
 
     rightCam = csiCamera()
@@ -79,48 +82,78 @@ def main():
     leftCam = csiCamera()
     leftCam.openCam("1")
 
-    print("\n\nProgram Ready!\n\n")
     leftToggle = GPIO.LOW
     rightToggle = GPIO.LOW
+    warningVal = GPIO.LOW
+
+    print("\n\nProgram Ready!\n\n")
     try:
         while True:
             leftValue = GPIO.input(leftSW)
             rightValue = GPIO.input(rightSW)
+            
             if not (leftValue == GPIO.HIGH and rightValue == GPIO.HIGH):
+                # Left side of the vehicle
                 if leftValue == GPIO.HIGH:
                     leftToggle ^= GPIO.HIGH
                     GPIO.output(leftTurn, leftToggle)
+                    
                     if not leftCam.display.IsStreaming():
-                        print("\nOpening display\n")
+                        print("\nOpening display 1\n")
                         leftCam.display.Open()
-                    leftCam.detectObjects()
+
+                    leftObjectInBlindSpot = leftCam.detectObjects()
+                    if leftObjectInBlindSpot and warningVal == GPIO.LOW:
+                        warningVal = GPIO.HIGH
+                    elif not leftObjectInBlindSpot and warningVal == GPIO.HIGH:
+                        warningVal = GPIO.LOW
+                    GPIO.output(warningLED, warningVal)
                 else:
-                    leftToggle = GPIO.LOW
-                    GPIO.output(leftTurn, leftToggle)
+                    if leftToggle == GPIO.HIGH:
+                        leftToggle = GPIO.LOW
+                        GPIO.output(leftTurn, leftToggle)
+
+                    if warningVal== GPIO.HIGH:
+                        warningVal = GPIO.LOW
+                        GPIO.output(warningLED, warningVal)
+                    
                     if leftCam.display.IsStreaming():
-                        print("\nClosing display\n")
+                        print("\nClosing display 1\n")
                         leftCam.display.Close()
 
+                # Right side of the vehicle
                 if rightValue == GPIO.HIGH:
                     rightToggle ^= GPIO.HIGH
                     GPIO.output(rightTurn, rightToggle)
+                    
                     if not rightCam.display.IsStreaming():
-                        print("\nOpening display\n")
-                        rightCam.display.Open()
-                    rightCam.detectObjects()
+                        print("\nOpening display 0\n")
+                        rightCam.display.Open()    
+                   
+                    rightobjectInBlindSpot = rightCam.detectObjects()
+                    if rightobjectInBlindSpot and warningVal == GPIO.LOW:
+                        warningVal = GPIO.HIGH
+                    elif not rightobjectInBlindSpot and warningVal == GPIO.HIGH:
+                        warningVal = GPIO.LOW
+                    GPIO.output(warningLED, warningVal)    
                 else:
-                    rightToggle = GPIO.LOW
-                    GPIO.output(rightTurn, rightToggle)
+                    if rightToggle == GPIO.HIGH:
+                        rightToggle = GPIO.LOW
+                        GPIO.output(rightTurn, rightToggle)
+
+                    if warningVal== GPIO.HIGH:
+                        warningVal = GPIO.LOW
+                        GPIO.output(warningLED, warningVal)
+                    
                     if rightCam.display.IsStreaming():
-                        print("\nClosing display\n")
+                        print("\nClosing display 0\n")
                         rightCam.display.Close()
                    
-                time.sleep(0.5)
+                time.sleep(0.125)
             else:
                 GPIO.output(leftTurn, GPIO.LOW)
-                #GPIO.output(leftWarning, GPIO.LOW)
                 GPIO.output(rightTurn, GPIO.LOW)
-                #GPIO.output(rightWarning, GPIO.LOW)
+                GPIO.output(warningLED, GPIO.LOW)
                 break
     finally:
         GPIO.cleanup()
