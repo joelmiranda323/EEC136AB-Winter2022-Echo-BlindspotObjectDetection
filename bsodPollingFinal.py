@@ -41,12 +41,6 @@ class csiCamera:
             self.camera = None
             self.display = None
 
-    def runThread(self):
-        if self.camera != None and self.display != None:
-            print("\n\nStarting thread for Cam" + self.camNum + "\n\n")
-            self.thread = threading.Thread(target = self.detectObjects)
-            self.thread.start()
-
     def detectObjects(self):
         objectsInBlindSpot = False
         self.img = self.camera.Capture()
