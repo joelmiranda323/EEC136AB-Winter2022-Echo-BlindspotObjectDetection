@@ -106,11 +106,11 @@ def main():
 
     # Setup left Camera
     leftCam = csiCamera()
-    leftCam.openCam("1")
+    leftCam.configCam("1")
 
     # Setup right Camera
     rightCam = csiCamera()
-    rightCam.openCam("0")
+    rightCam.configCam("0")
 
     # Initial state for left LEDs
     leftToggle = GPIO.LOW
