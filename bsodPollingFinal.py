@@ -32,7 +32,6 @@ class csiCamera:
             self.camera = jetson.utils.videoSource("csi://" + self.camNum)
             self.display = jetson.utils.videoOutput("display://" + self.camNum)
             self.img = self.camera.Capture()
-	
         except RuntimeError:
             print("\n\n CANNOT OPEN Cam" + camNum + "\n\n")
             self.camNum = None
@@ -130,7 +129,6 @@ def main():
             # Start polling if either switch is ON
             # Stop the progam if both switches are ON
             if not (leftValueSW == GPIO.HIGH and rightValueSW == GPIO.HIGH):
-                
                 ### Left side of the vehicle ###
                 # Driver is signaling to the left
                 if leftValueSW == GPIO.HIGH:
@@ -146,7 +144,6 @@ def main():
 		    # LED if an object is detected in the current
 		    # frame, else keep the YELLOW LED off
 		    warningNotif(leftCam, leftWarningLED, leftWarningVal)
-          
                 else:
                     # Driver is NOT signaling to the left
 		    # Turn OFF the RED LED
@@ -158,7 +155,7 @@ def main():
                     # Close the camera to stop capturing frames and
                     # Close the GUI to stop displaying frames
                     closeCamDis(leftCam)
-
+			
                 # Check Blindspot on the right side of the vehicle
                 if rightValueSW == GPIO.HIGH:
 		    toggleLED(rightTurn, rightToggle)
@@ -178,7 +175,6 @@ def main():
                 GPIO.output(rightWarningLED, GPIO.LOW)
                 break
     finally:
-        
         # Reset GPIOs and destroy the cameras
         GPIO.cleanup()
         leftCam.destroy()
