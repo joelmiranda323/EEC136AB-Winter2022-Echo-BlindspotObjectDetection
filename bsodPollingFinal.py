@@ -1,6 +1,5 @@
 import jetson.inference
 import jetson.utils
-import threading
 import RPi.GPIO as GPIO
 import time
 
@@ -25,7 +24,7 @@ class csiCamera:
         self.img = None
         self.detection = None
 
-    def openCam(self, camNum):
+    def configCam(self, camNum):
         try:
             print("\n\nOpenning Cam" + camNum + "\n\n")
             self.camNum = camNum
@@ -35,7 +34,7 @@ class csiCamera:
             self.img = self.camera.Capture()
 	
         except RuntimeError:
-            print("\n\n---Cannot open Cam" + camNum + "---\n\n")
+            print("\n\n CANNOT OPEN Cam" + camNum + "\n\n")
             self.camNum = None
             self.net = None
             self.camera = None
@@ -66,6 +65,38 @@ class csiCamera:
             
         self.img = None
         self.detection = None
+	
+def toggleLED(turnChannel, toggleChannel):
+	toggleChannel ^= GPIO.HIGH
+    	GPIO.output(turnChannel, toggleChannel)
+	
+def openCamDis(camObj):
+        if not camObj.camera.IsStreaming():
+        	camObj.camera.Open()
+
+	if not camObj.display.IsStreaming():
+		camObj.display.Open()
+	
+def warningNotif(camObj, warningChannel, warningVal):
+	objectInBlindSpot = camObj.detectObjects()
+
+	if objectInBlindSpot and warningVal == GPIO.LOW:
+		warningVal = GPIO.HIGH
+	elif not objectInBlindSpot and warningVal == GPIO.HIGH:
+		warningVal = GPIO.LOW
+	GPIO.output(warningChannel, warningVal)
+
+def turnOffGPIO(channel, val):
+	if val == GPIO.HIGH:
+       		val = GPIO.LOW
+        	GPIO.output(channel, val)
+		
+def closeCamDis(camObj):
+	if camObj.camera.IsStreaming():
+		camObj.camera.Close()
+	
+	if camObj.display.IsStreaming():
+		camObj.display.Close()
 
 def main():
     # GPIO Pin Setup:
@@ -103,88 +134,41 @@ def main():
                 ### Left side of the vehicle ###
                 # Driver is signaling to the left
                 if leftValueSW == GPIO.HIGH:
-
-                    # Toggle RED led to mimic a turn signal
-                    leftToggle ^= GPIO.HIGH
-                    GPIO.output(leftTurn, leftToggle)
-                    
-                    # Open the camera to capture frames
-                    if not leftCam.camera.IsStreaming():
-                        leftCam.camera.Open()
-                        print("\Camera 1 is open\n")
-
-                    # Open the GUI to display camera frames
-                    if not leftCam.display.IsStreaming():
-                        leftCam.display.Open()
-                        print("\nDisplay 1 is open\n")
-                        
-                    # Detect objects for the current frame
-                    leftObjectInBlindSpot = leftCam.detectObjects()
-
-                    # Singal the driver by turing ON the YELLOW LED
-                    # if an object is detected in the current frame 
-                    # else keep the YELLOW LED off
-                    if leftObjectInBlindSpot and leftWarningVal == GPIO.LOW:
-                        leftWarningVal = GPIO.HIGH
-                    elif not leftObjectInBlindSpot and leftWarningVal == GPIO.HIGH:
-                        leftWarningVal = GPIO.LOW
-                    GPIO.output(leftWarningLED, leftWarningVal)
+		    # Toggle RED led to mimic a turn signal
+		    toggleLED(leftTurn, leftToggle)
+		    
+		    # Open the camera to capture frames and
+		    # Open the GUI to display camera frames
+		    openCamDis(leftCam)
+			
+	 	    # Detect objects for the current frame and
+		    # Singal the driver by turing ON the YELLOW
+		    # LED if an object is detected in the current
+		    # frame, else keep the YELLOW LED off
+		    warningNotif(leftCam, leftWarningLED, leftWarningVal)
+          
                 else:
                     # Driver is NOT signaling to the left
-                    # Turn OFF the RED LED
-                    if leftToggle == GPIO.HIGH:
-                        leftToggle = GPIO.LOW
-                        GPIO.output(leftTurn, leftToggle)
+		    # Turn OFF the RED LED
+		    turnOffGPIO(leftTurn, leftToggle)
 
                     # Turn OFF the YELLOW LED
-                    if leftWarningVal== GPIO.HIGH:
-                        leftWarningVal = GPIO.LOW
-                        GPIO.output(leftWarningLED, leftWarningVal)
+		    turnOffGPIO(leftWarningLED, leftWarningVal)
 
-                    # Close the camera to stop capturing frames
-                    if leftCam.camera.IsStreaming():
-                        leftCam.camera.Close()
-                        print("\nCamera 1 is closed\n")
-
+                    # Close the camera to stop capturing frames and
                     # Close the GUI to stop displaying frames
-                    if leftCam.display.IsStreaming():
-                        leftCam.display.Close()
-                        print("\nDisplay 1 is closed\n")
+                    closeCamDis(leftCam)
 
-                # Right side of the vehicle
+                # Check Blindspot on the right side of the vehicle
                 if rightValueSW == GPIO.HIGH:
-                    rightToggle ^= GPIO.HIGH
-                    GPIO.output(rightTurn, rightToggle)
-
-                    if not rightCam.camera.IsStreaming():
-                        rightCam.camera.Open()
-                    
-                    if not rightCam.display.IsStreaming():
-                        rightCam.display.Open()    
-                   
-                    rightobjectInBlindSpot = rightCam.detectObjects()
-                    if rightobjectInBlindSpot and rightWarningVal == GPIO.LOW:
-                        rightWarningVal = GPIO.HIGH
-                    elif not rightobjectInBlindSpot and rightWarningVal == GPIO.HIGH:
-                        rightWarningVal = GPIO.LOW
-                    GPIO.output(rightWarningLED, rightWarningVal)    
+		    toggleLED(rightTurn, rightToggle)
+		    openCamDis(rightCam)
+		    warningNotif(rightCam, rightWarningLED, rightWarningVal)   
                 else:
-                    if rightToggle == GPIO.HIGH:
-                        rightToggle = GPIO.LOW
-                        GPIO.output(rightTurn, rightToggle)
-
-                    if rightWarningVal== GPIO.HIGH:
-                        rightWarningVal = GPIO.LOW
-                        GPIO.output(rightWarningLED, rightWarningVal)
-                    
-                    if rightCam.camera.IsStreaming():
-                        rightCam.camera.Close()
-                        print("\nCamera 0 is closed\n")
-                    
-                    if rightCam.display.IsStreaming():
-                        rightCam.display.Close()
-                        print("\nDisplay 0 is closed\n")
-
+		    # Driver is NOT signaling to the right
+		    turnOffGPIO(rightTurn, rightToggle)
+		    turnOffGPIO(rightWarningLED, rightWarningVal)
+                    closeCamDis(rightCam)
                 time.sleep(0.125)
             else:
                 # Turn OFF all LEDs
