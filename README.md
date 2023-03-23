@@ -7,5 +7,7 @@ blindspot_turnsig.py is our first implementation using only GPIOs to get the swi
 and LEDs working properly.
 
 We used singleCamDet.py to understand and get familiar with coding a single camera
-and tried to sync two cameras on syncCamDet.py. This was unsuccussful. Instead, we
+and tried to syncronize two cameras on syncCamDet.py, however, this was unsuccussful. 
+Instead, we merged singleCamDet.py and blindspot_turnsig.py to implement bsod.py to
+have the each camera turn on one at time base on a switch that's flipped.
 
