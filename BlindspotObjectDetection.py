@@ -66,15 +66,14 @@ class csiCamera:
         self.detection = None
 	
 def toggleLED(turnChannel, toggleChannel):
-	toggleChannel ^= GPIO.HIGH
-    	GPIO.output(turnChannel, toggleChannel)
+    toggleChannel ^= GPIO.HIGH
+    GPIO.output(turnChannel, toggleChannel)
 	
 def openCamDis(camObj):
-        if not camObj.camera.IsStreaming():
-        	camObj.camera.Open()
-
-	if not camObj.display.IsStreaming():
-		camObj.display.Open()
+    if not camObj.camera.IsStreaming():
+        camObj.camera.Open()
+    if not camObj.display.IsStreaming():
+	    camObj.display.Open()
 	
 def warningNotif(camObj, warningChannel, warningVal):
 	objectInBlindSpot = camObj.detectObjects()
@@ -86,9 +85,9 @@ def warningNotif(camObj, warningChannel, warningVal):
 	GPIO.output(warningChannel, warningVal)
 
 def turnOffGPIO(channel, val):
-	if val == GPIO.HIGH:
-       		val = GPIO.LOW
-        	GPIO.output(channel, val)
+    if val == GPIO.HIGH:
+        val = GPIO.LOW
+        GPIO.output(channel, val)
 		
 def closeCamDis(camObj):
 	if camObj.camera.IsStreaming():
@@ -125,46 +124,46 @@ def main():
             # Read left and right switch inputs
             leftValueSW = GPIO.input(leftSW)
             rightValueSW = GPIO.input(rightSW)
-            
+
             # Start polling if either switch is ON
             # Stop the progam if both switches are ON
             if not (leftValueSW == GPIO.HIGH and rightValueSW == GPIO.HIGH):
                 ### Left side of the vehicle ###
                 # Driver is signaling to the left
                 if leftValueSW == GPIO.HIGH:
-		    # Toggle RED led to mimic a turn signal
-		    toggleLED(leftTurn, leftToggle)
-		    
-		    # Open the camera to capture frames and
-		    # Open the GUI to display camera frames
-		    openCamDis(leftCam)
-			
-	 	    # Detect objects for the current frame and
-		    # Singal the driver by turing ON the YELLOW
-		    # LED if an object is detected in the current
-		    # frame, else keep the YELLOW LED off
-		    warningNotif(leftCam, leftWarningLED, leftWarningVal)
+                    # Toggle RED led to mimic a turn signal
+                    toggleLED(leftTurn, leftToggle)
+
+                    # Open the camera to capture frames and
+                    # Open the GUI to display camera frames
+                    openCamDis(leftCam)
+
+                    # Detect objects for the current frame and
+                    # Singal the driver by turing ON the YELLOW
+                    # LED if an object is detected in the current
+                    # frame, else keep the YELLOW LED off
+                    warningNotif(leftCam, leftWarningLED, leftWarningVal)
                 else:
                     # Driver is NOT signaling to the left
-		    # Turn OFF the RED LED
-		    turnOffGPIO(leftTurn, leftToggle)
+                    # Turn OFF the RED LED
+                    turnOffGPIO(leftTurn, leftToggle)
 
-                    # Turn OFF the YELLOW LED
-		    turnOffGPIO(leftWarningLED, leftWarningVal)
+                            # Turn OFF the YELLOW LED
+                    turnOffGPIO(leftWarningLED, leftWarningVal)
 
                     # Close the camera to stop capturing frames and
                     # Close the GUI to stop displaying frames
                     closeCamDis(leftCam)
-			
+                    
                 # Check Blindspot on the right side of the vehicle
                 if rightValueSW == GPIO.HIGH:
-		    toggleLED(rightTurn, rightToggle)
-		    openCamDis(rightCam)
-		    warningNotif(rightCam, rightWarningLED, rightWarningVal)   
+                    toggleLED(rightTurn, rightToggle)
+                    openCamDis(rightCam)
+                    warningNotif(rightCam, rightWarningLED, rightWarningVal)   
                 else:
-		    # Driver is NOT signaling to the right
-		    turnOffGPIO(rightTurn, rightToggle)
-		    turnOffGPIO(rightWarningLED, rightWarningVal)
+                    # Driver is NOT signaling to the right
+                    turnOffGPIO(rightTurn, rightToggle)
+                    turnOffGPIO(rightWarningLED, rightWarningVal)
                     closeCamDis(rightCam)
                 time.sleep(0.125)
             else:
