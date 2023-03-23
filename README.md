@@ -6,4 +6,6 @@ Jetson Nano microcontroller to alerts drivers of objects in their blindspot via 
 blindspot_turnsig.py is our first implementation using only GPIOs to get the switches
 and LEDs working properly.
 
-We used singleCamDet.py to understand and get familiar with coding a single camera/
+We used singleCamDet.py to understand and get familiar with coding a single camera
+and tried to sync two cameras on syncCamDet.py. This was unsuccussful. Instead, we
+
