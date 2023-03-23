@@ -15,6 +15,7 @@ rightTurn =  23         # Board pin 16 as right turn LED
 rightWarningLED = 22    # Board pin 15 as right warning LED
 rightSW = 27            # Board pin 13 as right switch
 
+# CSI camera object
 class csiCamera:
     def __init__(self):
         self.camNum = None
@@ -64,7 +65,8 @@ class csiCamera:
             
         self.img = None
         self.detection = None
-	
+
+# Helper functions	
 def toggleLED(turnChannel, toggleChannel):
     toggleChannel ^= GPIO.HIGH
     GPIO.output(turnChannel, toggleChannel)
@@ -92,10 +94,10 @@ def turnOffGPIO(channel, val):
 def closeCamDis(camObj):
 	if camObj.camera.IsStreaming():
 		camObj.camera.Close()
-	
 	if camObj.display.IsStreaming():
 		camObj.display.Close()
 
+# Main function
 def main():
     # GPIO Pin Setup:
     GPIO.setmode(GPIO.BCM)  # BCM pin-numbering scheme from Raspberry Pi
@@ -148,7 +150,7 @@ def main():
                     # Turn OFF the RED LED
                     turnOffGPIO(leftTurn, leftToggle)
 
-                            # Turn OFF the YELLOW LED
+                    # Turn OFF the YELLOW LED
                     turnOffGPIO(leftWarningLED, leftWarningVal)
 
                     # Close the camera to stop capturing frames and
