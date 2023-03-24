@@ -10,7 +10,7 @@ cars. A camera was placed on each side of the car and proved to detect objects i
 the cars blindspot.
 
 ## Python
-#### Implementation
+### Implementation
 blindspot_turnsig.py is our first implementation using only GPIOs to get the switches
 and LEDs working properly.
 
@@ -19,7 +19,7 @@ and tried to syncronize two cameras with syncCamDet.py, however, this was unsucc
 Instead, we merged singleCamDet.py and blindspot_turnsig.py to implement bsod.py that runs
 the two cameras sequentially depending on the switch that's turned on.
 
-#### Final submission
+### Final submission
 We developed BlindspotObjectDetectionFinal.py as our final software progam that meets 
 with our goal. This final submission supports hardware updates and was extensively debugged
 and edited to make our code readable and more efficient.
