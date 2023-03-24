@@ -1,7 +1,7 @@
 # Blindspot Object Detection
 ### Our goal
 In this repository, my team, Team Echo, developed a final version of our Blindspot 
-Object Detection system that uses dual cameras supported by the NVIDIA Jetson Nano 
+Object Detection system that uses two cameras supported by the NVIDIA Jetson Nano 
 microcontroller to alerts drivers of objects in their blindspot via LEDs.
 
 ### Simulation
