@@ -19,6 +19,6 @@ Instead, we merged singleCamDet.py and blindspot_turnsig.py to implement bsod.py
 have the each camera turn on sequentially based on a switch that's flipped on.
 
 ### Final submission
-After some hardware updates, debugging, and touch ups to make our code readable and
-more efficient, we developed BlindspotObjectDetectionFinal.py as our final software
-progam that meets with our goal.
+We developed BlindspotObjectDetectionFinal.py as our final software progam that meets 
+with our goal. This final submission supports hardware updates and was extensively debugged
+and edited to make our code readable and more efficient.
