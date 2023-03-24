@@ -16,7 +16,7 @@ and LEDs working properly.
 We used singleCamDet.py to understand and get familiar with coding a single camera
 and tried to syncronize two cameras with syncCamDet.py, however, this was unsuccussful. 
 Instead, we merged singleCamDet.py and blindspot_turnsig.py to implement bsod.py that runs
-the two camers sequentially depending on a switch that's flipped on.
+the two camers sequentially depending on a switch that's turned on.
 
 ### Final submission
 We developed BlindspotObjectDetectionFinal.py as our final software progam that meets 
