@@ -5,7 +5,7 @@ Object Detection system that uses two cameras supported by the NVIDIA Jetson Nan
 microcontroller to alerts drivers of objects in their blindspot via LEDs.
 
 ### Simulation
-First, we simulated a scenerio of a car driving and switching lanes with near other
+First, we simulated a scenerio of a car driving and switching lanes near other
 cars. A camera was placed on each side of the car and proved to detect objects in 
 the cars blindspot.
 
