@@ -1,14 +1,15 @@
 # Blindspot Object Detection
-### Our goal
+## Our goal
 In this repository, my team, Team Echo, developed a final version of our Blindspot 
 Object Detection system that uses two cameras supported by the NVIDIA Jetson Nano 
 microcontroller to alerts drivers of objects in their blindspot via LEDs.
 
-### Simulation
+## Simulation
 First, we simulated a scenerio of a car driving and switching lanes near other
 cars. A camera was placed on each side of the car and proved to detect objects in 
 the cars blindspot.
 
+## Python
 ### Implementation
 blindspot_turnsig.py is our first implementation using only GPIOs to get the switches
 and LEDs working properly.
