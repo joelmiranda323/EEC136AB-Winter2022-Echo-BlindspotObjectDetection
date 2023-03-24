@@ -5,9 +5,9 @@ Object Detection system that uses dual cameras supported by the NVIDIA Jetson Na
 microcontroller to alerts drivers of objects in their blindspot via LEDs.
 
 ### Simulation
-First, we simulated a scenerio of a car driving and switching lanes with other cars
-driving. A camera was placed on each side of the car and proved to detect objects 
-in the cars blindspot.
+First, we simulated a scenerio of a car driving and switching lanes with near other
+cars. A camera was placed on each side of the car and proved to detect objects in 
+the cars blindspot.
 
 ### Implementation
 blindspot_turnsig.py is our first implementation using only GPIOs to get the switches
